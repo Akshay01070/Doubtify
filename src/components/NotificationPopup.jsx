@@ -20,7 +20,7 @@ const notifications = [
 const NotificationPopup = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex  bg-black bg-opacity-50">
-      <div className="relative bg-white lg:w-60 xl:w-96 max-h-96 mt-14 xl:ml-[930px] lg:ml-[600px] rounded-lg shadow-lg overflow-hidden">
+      <div className="relative bg-white lg:w-60 xl:w-96 max-h-96 mt-14 xl:ml-[930px] lg:ml-[601px] rounded-lg shadow-lg overflow-hidden">
         
         <div className="sticky flex lg:gap-28 xl:gap-56 top-0 bg-white z-10 p-4 border-b">
           <h3 className=" xl:text-xl text-base font-semibold">Notification</h3>
