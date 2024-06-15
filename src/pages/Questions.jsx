@@ -17,11 +17,11 @@ const Questions = () => {
   };
 
   return (
-    <div className="p-6 xl:w-[750px]">
-      <div className="flex  items-center mb-4 xl:gap-x-[350px]">
+    <div className="p-6 lg:w-[570px] xl:w-[750px]">
+      <div className="flex  items-center mb-4 lg:gap-x-[180px]  xl:gap-x-[350px]">
         <h1 className="text-2xl font-bold">All Questions</h1>
         <div className="relative">
-          <button onClick={handleFilterClick} className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded shadow-sm w-48 justify-between">
+          <button onClick={handleFilterClick} className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded shadow-sm w-40 xl:w-48 justify-between">
             {selectedFilter} <FiChevronDown className="ml-2" />
           </button>
           {showFilter && (

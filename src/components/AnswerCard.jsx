@@ -10,7 +10,7 @@ const AnswerCard = () => {
   };
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg shadow-lg xl:w-[700px] my-4 place-items-center relative">
+    <div className="bg-gray-100 xl:p-6 p-4 rounded-lg shadow-lg xl:w-[700px] lg:w-[500px] my-4 place-items-center relative">
       <button className="absolute top-2 right-2 text-gray-500">
         <FiX size={20} />
       </button>

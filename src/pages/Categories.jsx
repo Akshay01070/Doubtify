@@ -4,7 +4,7 @@ import CategoryCard from '../components/CategoryCard';
 
 const Categories = () => {
   return (
-    <div className=" w-[860px] h-screen">
+    <div className=" xl:w-[860px] lg:w-[550px] h-screen">
       <div className="sticky top-0 bg-white z-20  p-4">
         <div className="flex justify-between mb-6">
           <h1 className="text-2xl font-bold">Categories</h1>

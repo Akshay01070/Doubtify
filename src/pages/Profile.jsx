@@ -4,7 +4,7 @@ import { FaCalendarAlt } from 'react-icons/fa';
 const Profile = () => {
   
   return <div className=''>
-    <div className="max-w-[800px] p-4 bg-white rounded-lg  w-[850px]">
+    <div className="xl:w-[800px] lg:w-[550px] p-4 bg-white rounded-lg ">
     <div className="flex items-start mb-4">
         <img
           src="https://via.placeholder.com/100"

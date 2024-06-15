@@ -20,10 +20,10 @@ const notifications = [
 const NotificationPopup = ({ onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex  bg-black bg-opacity-50">
-      <div className="relative bg-white w-96 max-h-[400px] mt-14 ml-[930px] rounded-lg shadow-lg overflow-hidden">
+      <div className="relative bg-white lg:w-60 xl:w-96 max-h-96 mt-14 xl:ml-[930px] lg:ml-[600px] rounded-lg shadow-lg overflow-hidden">
         
-        <div className="sticky flex gap-56 top-0 bg-white z-10 p-4 border-b">
-          <h3 className="text-xl font-semibold">Notification</h3>
+        <div className="sticky flex lg:gap-28 xl:gap-56 top-0 bg-white z-10 p-4 border-b">
+          <h3 className=" xl:text-xl text-base font-semibold">Notification</h3>
         <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
             &#10005;
           </button>
@@ -31,10 +31,10 @@ const NotificationPopup = ({ onClose }) => {
         <div className="p-4 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100" style={{ maxHeight: 'calc(100vh - 10rem)' }}>
           {notifications.map((notification, index) => (
             <div key={index} className="flex items-start space-x-3">
-              <img src={userImage} alt="User" className="w-10 h-10 rounded-full" />
+              <img src={userImage} alt="User" className="xl:w-10 w-6 xl:h-10 h-6 rounded-full" />
               <div>
-                <p className="text-sm"><span className="font-semibold">@{notification.user}</span> {notification.action}</p>
-                <p className="text-xs text-gray-500">{notification.time}</p>
+                <p className="text-xs"><span className="font-semibold">@{notification.user}</span> {notification.action}</p>
+                <p className="text-[8px] text-gray-500">{notification.time}</p>
               </div>
             </div>
           ))}

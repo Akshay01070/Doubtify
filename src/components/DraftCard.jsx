@@ -3,7 +3,7 @@ import { FaEdit, FaTrashAlt, FaTimes } from 'react-icons/fa';
 
 const DraftCard = () => {
   return (
-    <div className="relative p-4 bg-white rounded-lg shadow-md w-[750px]">
+    <div className="relative p-4 bg-white rounded-lg shadow-md xl:w-[750px] lg:w-[550px]">
       <div className="absolute top-2 left-4 text-gray-600 text-xs">Answer • Unpublished</div>
       <button className="absolute top-2 right-4 text-gray-500 hover:text-gray-700">
         <FaTimes />
