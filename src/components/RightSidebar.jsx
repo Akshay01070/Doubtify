@@ -16,5 +16,4 @@ const RightSidebar = () => {
     </div>
   );
 };
-
 export default RightSidebar;

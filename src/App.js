@@ -38,7 +38,7 @@ function App() {
               <Route path="/home/answer" element={<Answer />} />
             </Routes>
           </div>
-          <RightSidebar />
+          {/* <RightSidebar /> */}
         </div>
       </div>
     </Router>

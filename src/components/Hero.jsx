@@ -31,7 +31,7 @@ const Hero = ({ stopOnClick }) => {
   };
 
   return (
-    <div className=" bg-gray-100 p-4 sm:p-6 rounded-lg shadow-lg w-[750px] max-w-[750px] mx-auto my-4 place-items-center relative">
+    <div className=" bg-gray-100 sm:p-6 rounded-lg shadow-lg w-[350px] max-w-[750px] mx-auto my-4 place-items-center relative">
       <button className="absolute top-2 right-2 text-gray-500">
         <FiX size={20} />
       </button>
@@ -51,7 +51,7 @@ const Hero = ({ stopOnClick }) => {
         <div>
           <h3 className="text-base font-medium mb-2">How can I learn data structures efficiently?</h3>
           <p className="text-gray-500 text-[11px] font-normal mb-1 ml-2">2 Answers</p>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-row items-center justify-between sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center mb-2 sm:mb-0">
               <button
                 onClick={handleAnswerClick}

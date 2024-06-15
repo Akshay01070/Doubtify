@@ -24,7 +24,7 @@ const NavBar = ({ toggleSidebar }) => { // Accept toggleSidebar prop
           <button className="md:hidden" onClick={toggleSidebar}>
             <Bars3Icon className="h-6 w-6 text-gray-700" />
           </button>
-          <div className="text-lg font-bold">My App</div>
+          
         </div>
         
         <div className="relative flex-grow">
