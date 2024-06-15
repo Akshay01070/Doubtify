@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, QuestionMarkCircleIcon, UserIcon, PencilIcon, BookmarkIcon, TagIcon } from '@heroicons/react/outline';
+import {
+  HomeIcon,
+  QuestionMarkCircleIcon,
+  UserIcon,
+  PencilIcon,
+  BookmarkIcon,
+  TagIcon,
+} from '@heroicons/react/outline';
 
 const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
   const location = useLocation();
@@ -14,7 +21,7 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
 
   const handleButtonClick = (path) => {
     setActiveButton(path);
-    if (window.innerWidth <= 700) {
+    if (window.innerWidth <= 768) {
       toggleSidebar(); // Close sidebar on mobile after clicking a link
     }
   };
@@ -28,22 +35,22 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
         ></div>
       )}
       <div
-        className={`fixed top-0 left-0 w-64 md:w-1/5 h-full bg-gray-200 shadow-lg p-4 flex flex-col space-y-4 transform transition-transform duration-300 ease-in-out z-50 ${
+        className={`fixed top-0 left-0 lg:w-64 md:w-36 md:p-2 h-full bg-gray-200 shadow-lg  p-4 flex flex-col space-y-4 transform transition-transform duration-300 ease-in-out z-40 ${
           isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
         <Link
           to="/home"
           onClick={() => handleButtonClick('/home')}
-          className={`mt-12 flex items-center space-x-2 w-full h-14 ${
+          className={`mt-20 flex items-center space-x-2 w-full h-14 ${
             activeButton === '/home'
               ? 'bg-gradient-to-r from-blue-400 to-blue-600 text-white rounded-md'
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <HomeIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Home</span>
+            <span className="text-lg md:text-base">Home</span>
           </div>
         </Link>
         <Link
@@ -55,9 +62,9 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <QuestionMarkCircleIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Questions</span>
+            <span className="text-lg md:text-base">Questions</span>
           </div>
         </Link>
         <Link
@@ -69,9 +76,9 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <UserIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Profile</span>
+            <span className="text-lg md:text-base">Profile</span>
           </div>
         </Link>
         <Link
@@ -83,9 +90,9 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <PencilIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Drafts</span>
+            <span className="text-lg md:text-base">Drafts</span>
           </div>
         </Link>
         <Link
@@ -97,9 +104,9 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <BookmarkIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Bookmarks</span>
+            <span className="text-lg md:text-base">Bookmarks</span>
           </div>
         </Link>
         <Link
@@ -111,9 +118,9 @@ const LeftSidebar = ({ isSidebarOpen, toggleSidebar }) => {
               : 'bg-transparent text-black'
           }`}
         >
-          <div className="flex ml-8 gap-2 text-lg md:text-base truncate">
+          <div className="flex items-center gap-2 w-full">
             <TagIcon className="h-6 w-6 md:h-5 md:w-5" />
-            <span>Categories</span>
+            <span className="text-lg md:text-base">Categories</span>
           </div>
         </Link>
       </div>

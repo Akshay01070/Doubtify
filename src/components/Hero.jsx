@@ -31,7 +31,7 @@ const Hero = ({ stopOnClick }) => {
   };
 
   return (
-    <div className=" bg-gray-100 sm:p-6 rounded-lg shadow-lg w-[350px] max-w-[750px] mx-auto my-4 place-items-center relative">
+    <div className=" bg-gray-100 sm:p-6 rounded-lg shadow-lg w-[350px] md:w-[420px] md:ml-0 xl:w-[700px] my-4 place-items-center relative">
       <button className="absolute top-2 right-2 text-gray-500">
         <FiX size={20} />
       </button>

@@ -25,7 +25,7 @@ function App() {
         <NavBar toggleSidebar={toggleSidebar} />
         <div className="flex pt-16">
           <LeftSidebar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-          <div className={`flex-grow p-4 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'} md:ml-64`}>
+          <div className={`flex-grow p-4 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-0'} md:ml-36 xl:ml-80`}>
             <Routes>
               <Route path="/home" element={<Home />} />
               <Route path="/questions" element={<Questions />} />
@@ -38,7 +38,7 @@ function App() {
               <Route path="/home/answer" element={<Answer />} />
             </Routes>
           </div>
-          {/* <RightSidebar /> */}
+          <RightSidebar />
         </div>
       </div>
     </Router>

@@ -4,7 +4,7 @@ import AnswerCard from "../components/AnswerCard";
 
 const Answer = () => {
     
-    return <div className=' ml-96'>
+    return <div className='xl:p-6 xl:w-[750px]'>
        <Hero stopOnClick={true} />
       <div>
       <h1 className="text-2xl font-bold mb-4 mt-8">All Answers</h1>

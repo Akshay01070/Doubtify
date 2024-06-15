@@ -3,8 +3,8 @@ import Profilecomp from '../components/Profilecomp';
 import { FaCalendarAlt } from 'react-icons/fa';
 const Profile = () => {
   
-  return <div className='ml-80'>
-    <div className="max-w-4xl mx-auto p-4 bg-white rounded-lg  w-[850px]">
+  return <div className=''>
+    <div className="max-w-[800px] p-4 bg-white rounded-lg  w-[850px]">
     <div className="flex items-start mb-4">
         <img
           src="https://via.placeholder.com/100"

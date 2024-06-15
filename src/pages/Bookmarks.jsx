@@ -15,8 +15,8 @@ const Bookmarks = () => {
     setShowFilter(false);
   };
   return(
-    <div className="p-6 ml-80">
-      <div className="flex justify-between items-center mb-4 gap-x-[470px]">
+    <div className="p-6 xl:w-[750px]">
+      <div className="flex items-center mb-4 gap-x-[330px]">
         <h1 className="text-2xl font-bold">My Bookmarks</h1>
         <div className="relative">
           <button onClick={handleFilterClick} className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded shadow-sm w-48 justify-between">

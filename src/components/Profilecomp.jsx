@@ -3,7 +3,7 @@ import React from 'react';
 
 const Profilecomp = () => {
   return (
-    <div className="">
+    <div className=" xl:w-[800px]">
       
       
       <div className="bg-gray-100 p-4 rounded-lg shadow">
