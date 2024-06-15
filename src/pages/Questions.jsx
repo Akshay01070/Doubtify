@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { FiChevronDown } from 'react-icons/fi';
 import Hero from '../components/Hero';
+import InfiniteScroll from 'react-infinite-scroll-component';
+
 
 const Questions = () => {
   const [showFilter, setShowFilter] = useState(false);
@@ -14,6 +16,17 @@ const Questions = () => {
   const handleFilterSelect = (filter) => {
     setSelectedFilter(filter);
     setShowFilter(false);
+  };
+
+  const [items, setItems] = useState(Array.from({ length: 20 }));
+
+  const fetchMoreData = () => {
+    setTimeout(() => {
+      setItems((prevItems) => [
+        ...prevItems,
+        ...Array.from({ length: 20 })
+      ]);
+    }, 1500);
   };
 
   return (
@@ -43,9 +56,19 @@ const Questions = () => {
         </div>
       </div>
       <hr className="border-gray-300" />
-      <Hero/>
-      <Hero/>
-      <Hero/>
+      <InfiniteScroll
+        dataLength={items.length}
+        next={fetchMoreData}
+        hasMore={true}
+        loader={<h4></h4>}
+      >
+        {items.map((_, index) => (
+          <div key={index}>
+            <Hero classname="mt-[50px]" />
+          </div>
+        ))}
+      </InfiniteScroll>
+      
     </div>
   );
 };
