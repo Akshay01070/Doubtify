@@ -3,228 +3,136 @@ import upvoteModel from "../models/upvotesModel.js";
 import uploadOnCloud from "../Utils/cloudinary.js";
 import fs from 'fs';
 
-const addQuestion = async(req,res)=>{
-     const {userId} = req.params;
-     const {body,categories,subCategories} = req.body;
-     const files = req.files;
-     
-     if (!userId || !body || !categories || !subCategories) {
-        return res.status(400).json({ message: "Incomplete data provided" });
+const addQuestion = async (req, res) => {
+  const { userId } = req.params;
+  const { body, categories, subCategories, category, subCategory } = req.body;
+  const files = req.files;
+
+  // Accept both field name variants from frontend
+  const cat = categories || category || '';
+  const subCat = subCategories || subCategory || '';
+
+  if (!userId || !body) {
+    return res.status(400).json({ message: "Question body is required" });
+  }
+
+  let filesArray = [];
+  if (files && files.length > 0) {
+    await Promise.all(files.map(async (file) => {
+      const localFilepath = file ? file.path : null;
+      if (localFilepath) {
+        try {
+          const cloudinaryResponse = await uploadOnCloud(localFilepath);
+          filesArray.push(cloudinaryResponse.url);
+          fs.unlinkSync(localFilepath);
+        } catch (error) {
+          console.error('Error uploading to Cloudinary:', error);
+        }
       }
+    }));
+  }
 
-      let filesArray=[];
-      if(files){
-        
-      await Promise.all(files.map(async(file)=>{
-        const localFilepath = file ? file.path : null;
-        let cloudinaryResponse = null;
-        if (localFilepath) {
-            console.log('Uploading file to Cloudinary:', localFilepath);
-            try {
-              cloudinaryResponse = await uploadOnCloud(localFilepath);
-              console.log('Cloudinary response:', cloudinaryResponse);
-              filesArray.push(cloudinaryResponse.url);
-              fs.unlinkSync(localFilepath); // Remove file after successful upload
-            } catch (error) {
-              console.error('Error uploading to Cloudinary:', error);
-              return res.status(500).json({ success: false, message: "Error uploading profile picture", error: error.message });
-            }
-          }
-    
-      }));
+  try {
+    const question = new questionModel({
+      userId: userId,
+      body: body,
+      categories: cat,
+      subCategories: subCat,
+      files: filesArray
+    });
 
+    await question.save();
+    res.status(201).json({ success: true, message: "Question added successfully", data: { question } });
+  } catch (error) {
+    console.error("Error adding question:", error);
+    res.status(500).json({ success: false, message: "Failed to add question" });
+  }
+};
+
+const getAllQuestions = async (req, res) => {
+  try {
+    const questions = await questionModel.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: questions });
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ success: false, message: "Error fetching questions" });
+  }
+};
+
+const getQuesById = async (req, res) => {
+  const { quesId } = req.params;
+  try {
+    const question = await questionModel.findById(quesId);
+    if (!question) {
+      return res.status(404).json({ success: false, message: "Question not found" });
     }
-      try{
-        const question = new questionModel({
-            userId:userId,
-            body:body,
-            categories:categories,
-            subCategories:subCategories,
-            files:filesArray
-          })
-     
-         await question.save();
-         res.status(201).json({ message: "Question added successfully", data:{question} });
-      }
-      catch (error) {
-        console.error("Error adding question:", error);
-        res.status(500).json({ message: "Failed to add question" });
-      }
-}
+    res.json({ success: true, data: question });
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ success: false, message: "Error fetching question" });
+  }
+};
 
-const getAllQuestions = async(req,res) => {
-try{
-  const questions = await questionModel.find();
-  console.log(questions);
-  res.json({success:true,data:questions});
-}
-catch(error){
-console.log("Error :",error);
-}
-}
+const getQuesByUserId = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const questions = await questionModel.find({ userId: userId }).sort({ createdAt: -1 });
+    res.json({ success: true, data: questions });
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ success: false, message: "Error fetching questions" });
+  }
+};
 
-const getQuesById = async(req,res)=>{
-const {quesId} = req.params;
-try{
+// Get distinct categories with question counts
+const getCategories = async (req, res) => {
+  try {
+    const categories = await questionModel.aggregate([
+      { $match: { categories: { $ne: '', $exists: true } } },
+      { $group: { _id: '$categories', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+    res.json({ success: true, data: categories });
+  } catch (error) {
+    console.error("Error getting categories:", error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
 
-  const question = await questionModel.find({_id:quesId});
-  console.log(question[0]);
-  res.json({success:true,data:question[0]});
-}
-catch(error){
-console.log("Error :",error);
-}
-}
+// Search questions
+const searchQuestions = async (req, res) => {
+  const { q } = req.query;
+  try {
+    const questions = await questionModel.find({
+      body: { $regex: q || '', $options: 'i' }
+    }).sort({ createdAt: -1 });
+    res.json({ success: true, data: questions });
+  } catch (error) {
+    console.error("Error searching questions:", error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
 
-const getQuesByUserId = async(req,res)=>{
-const {userId} = req.params;
-try{
-  const questions = await questionModel.find({userId:userId});
-  res.json({success:true,data:{questions}});
-}
-catch(error){
-console.log("Error :",error);
-}
-}
-
-
-// const upvoteQuestion = async (req, res) => {
-//   const { questionId, userId } = req.body;
-
-//   try {
-//     // Check if the upvote already exists
-//     const existingUpvote = await upvoteModel.findOne({ questionId: questionId, userId: userId });
-
-//     // Fetch the question to update the upvote count
-//     const question = await questionModel.findById(questionId);
-
-//     if (!question) {
-//       return res.status(404).json({ success: false, message: 'Question not found' });
-//     }
-
-//     if (existingUpvote) {
-//       // If upvote exists, remove it and decrement the upvote count
-//       // await existingUpvote.remove();
-//       await upvoteModel.deleteOne({ _id: existingUpvote._id });
-
-//       question.upvotes -= 1;
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, message: 'Upvote removed' });
-//     } else {
-//       // If upvote does not exist, add it and increment the upvote count
-//       const upvoteInfo = new upvoteModel({
-//         questionId: questionId,
-//         userId: userId
-//       });
-//       await upvoteInfo.save();
-//       question.upvotes += 1;
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, message: 'Upvote added' });
-//     }
-//   } catch (error) {
-//     console.error("Error updating upvotes:", error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// };
-
-// const upvoteQuestion = async (req, res) => {
-//   const { questionId, userId } = req.body;
-
-//   try {
-//     // Check if the upvote already exists
-//     const existingUpvote = await upvoteModel.findOne({ questionId: questionId, userId: userId });
-
-//     // Fetch the question to update the upvote count
-//     const question = await questionModel.findById(questionId);
-
-//     if (!question) {
-//       return res.status(404).json({ success: false, message: 'Question not found' });
-//     }
-
-//     if (existingUpvote) {
-//       // If upvote exists, remove it and decrement the upvote count
-//       await upvoteModel.deleteOne({ _id: existingUpvote._id });
-//       if(question.upvotes>0){
-//       question.upvotes -= 1;
-//     }
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, message: 'Upvote removed' });
-//     } else {
-//       // If upvote does not exist, add it and increment the upvote count
-//       const upvoteInfo = new upvoteModel({
-//         questionId: questionId,
-//         userId: userId
-//       });
-//       await upvoteInfo.save();
-//       question.upvotes += 1;
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, message: 'Upvote added' });
-//     }
-//   } catch (error) {
-//     console.error("Error updating upvotes:", error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// };
-
-// const upvoteQuestion = async (req, res) => {
-//   const { questionId, userId } = req.body;
-
-//   try {
-//     // Check if the upvote already exists
-//     const existingUpvote = await upvoteModel.findOne({ questionId: questionId, userId: userId });
-
-//     // Fetch the question to update the upvote count
-//     const question = await questionModel.findById(questionId);
-
-//     if (!question) {
-//       return res.status(404).json({ success: false, message: 'Question not found' });
-//     }
-
-//     if (existingUpvote) {
-//       // If upvote exists, remove it and decrement the upvote count
-//       await upvoteModel.deleteOne({ _id: existingUpvote._id });
-//       if (question.upvotes > 0) {
-//         question.upvotes -= 1;
-//       }
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, question, message: 'Upvote removed' });
-//     } else {
-//       // If upvote does not exist, add it and increment the upvote count
-//       const upvoteInfo = new upvoteModel({
-//         questionId: questionId,
-//         userId: userId
-//       });
-//       await upvoteInfo.save();
-//       question.upvotes += 1;
-//       await question.save();
-//       return res.json({ success: true, upvotes: question.upvotes, question, message: 'Upvote added' });
-//     }
-//   } catch (error) {
-//     console.error("Error updating upvotes:", error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// };
-
-// const getUpvoteStatus = async (req, res) => {
-//   const { questionId, userId } = req.body;
-
-//   try {
-//     const existingUpvote = await upvoteModel.findOne({ questionId: questionId, userId: userId });
-//     res.json({ success: true, isUpvoted: !!existingUpvote });
-//   } catch (error) {
-//     console.error("Error fetching upvote status:", error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// };
+// Delete a question
+const deleteQuestion = async (req, res) => {
+  const { questionId } = req.params;
+  try {
+    const question = await questionModel.findByIdAndDelete(questionId);
+    if (!question) {
+      return res.status(404).json({ success: false, message: "Question not found" });
+    }
+    res.json({ success: true, message: "Question deleted" });
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
 
 const upvoteQuestion = async (req, res) => {
   const { questionId, userId } = req.body;
 
   try {
-    // Check if the upvote already exists
     const existingUpvote = await upvoteModel.findOne({ questionId, userId });
-
-    // Fetch the question to update the upvote count
     const question = await questionModel.findById(questionId);
 
     if (!question) {
@@ -232,7 +140,6 @@ const upvoteQuestion = async (req, res) => {
     }
 
     if (existingUpvote) {
-      // If upvote exists, remove it and decrement the upvote count
       await upvoteModel.deleteOne({ _id: existingUpvote._id });
       if (question.upvotes > 0) {
         question.upvotes -= 1;
@@ -240,7 +147,6 @@ const upvoteQuestion = async (req, res) => {
       await question.save();
       return res.json({ success: true, upvotes: question.upvotes, question, message: 'Upvote removed' });
     } else {
-      // If upvote does not exist, add it and increment the upvote count
       const upvoteInfo = new upvoteModel({ questionId, userId });
       await upvoteInfo.save();
       question.upvotes += 1;
@@ -270,5 +176,4 @@ const getUpvoteStatus = async (req, res) => {
   }
 };
 
-
-export {addQuestion,getAllQuestions,getQuesById,getQuesByUserId,upvoteQuestion,getUpvoteStatus};
+export { addQuestion, getAllQuestions, getQuesById, getQuesByUserId, upvoteQuestion, getUpvoteStatus, getCategories, searchQuestions, deleteQuestion };

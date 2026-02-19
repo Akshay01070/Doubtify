@@ -4,7 +4,7 @@ const authMiddleware = (req, res, next) => {
   const { token } = req.headers;
 
   if (!token) {
-    res.json({ success: false, message: "Not authorized Login again" });
+    return res.json({ success: false, message: "Not authorized Login again" });
   }
   try {
     const token_decode = jwt.verify(token, process.env.JWT_SECRET);
@@ -12,7 +12,7 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (error) {
     console.log(error);
-    res.json({ success: false, message: "Error" });
+    return res.json({ success: false, message: "Error" });
   }
 };
 

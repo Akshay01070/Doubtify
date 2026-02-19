@@ -2,95 +2,80 @@ import answerModel from "../models/answerModel.js";
 import uploadOnCloud from "../Utils/cloudinary.js";
 import fs from 'fs';
 
-const addAnswer = async(req,res)=>{
-const {userId,questionId} = req.params;
-const {body} = req.body ;
+const addAnswer = async (req, res) => {
+  const { userId, questionId } = req.params;
+  const { body } = req.body;
+  const files = req.files;
 
-console.log(userId);
-console.log(questionId);
-console.log(body);
+  if (!userId || !questionId || !body) {
+    return res.status(400).json({ success: false, message: "Incomplete data provided" });
+  }
 
-const files = req.files;
-     
+  let filesArray = [];
+  if (files && files.length > 0) {
+    await Promise.all(files.map(async (file) => {
+      const localFilepath = file ? file.path : null;
+      if (localFilepath) {
+        try {
+          const cloudinaryResponse = await uploadOnCloud(localFilepath);
+          filesArray.push(cloudinaryResponse.url);
+          fs.unlinkSync(localFilepath);
+        } catch (error) {
+          console.error('Error uploading to Cloudinary:', error);
+        }
+      }
+    }));
+  }
 
-if (!userId || !questionId || !body) {
-   return res.status(400).json({ message: "Incomplete data provided" });
- }
-
- let filesArray=[];
- if(files){
-   
- await Promise.all(files.map(async(file)=>{
-   const localFilepath = file ? file.path : null;
-   let cloudinaryResponse = null;
-   if (localFilepath) {
-       console.log('Uploading file to Cloudinary:', localFilepath);
-       try {
-         cloudinaryResponse = await uploadOnCloud(localFilepath);
-         console.log('Cloudinary response:', cloudinaryResponse);
-         filesArray.push(cloudinaryResponse.url);
-         fs.unlinkSync(localFilepath); // Remove file after successful upload
-       } catch (error) {
-         console.error('Error uploading to Cloudinary:', error);
-         return res.status(500).json({ success: false, message: "Error uploading profile picture", error: error.message });
-       }
-     }
-
- }));
-
-}
-
-try{
+  try {
     const answer = new answerModel({
-        userId:userId,
-        questionId:questionId,
-        body:body,
-        files:filesArray
-      })
- 
-     await answer.save();
-     res.status(201).json({ message: "Answer added successfully", data:{answer} });
+      userId: userId,
+      questionId: questionId,
+      body: body,
+      files: filesArray
+    });
+
+    await answer.save();
+    res.status(201).json({ success: true, message: "Answer added successfully", data: { answer } });
+  } catch (error) {
+    console.error("Error adding answer:", error);
+    res.status(500).json({ success: false, message: "Failed to add answer" });
   }
-  catch (error) {
-    console.error("Error adding question:", error);
-    res.status(500).json({ message: "Failed to add question" });
+};
+
+const getAllAnswersByQuesId = async (req, res) => {
+  const { quesId } = req.params;
+  try {
+    const answers = await answerModel.find({ questionId: quesId }).sort({ createdAt: -1 });
+    res.json({ success: true, data: answers });
+  } catch (error) {
+    console.log("Error:", error);
+    res.status(500).json({ success: false, message: "Error fetching answers" });
   }
-}
+};
 
+// Get answer count for a question
+const getAnswerCount = async (req, res) => {
+  const { questionId } = req.params;
+  try {
+    const count = await answerModel.countDocuments({ questionId });
+    res.json({ success: true, count });
+  } catch (error) {
+    console.error("Error counting answers:", error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
 
-// const getAllQuestions = async(req,res) => {
-// try{
-//   const questions = await questionModel.find();
-//   console.log(questions);
-//   res.json({success:true,message:"Displaying all questions"});
-// }
-// catch(error){
-// console.log("Error :",error);
-// }
-// }
+// Get answers by user
+const getAnswersByUserId = async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const answers = await answerModel.find({ userId }).sort({ createdAt: -1 });
+    res.json({ success: true, data: answers });
+  } catch (error) {
+    console.error("Error fetching user answers:", error);
+    res.status(500).json({ success: false, message: "Error" });
+  }
+};
 
-const getAllAnswersByQuesId = async(req,res)=>{
-const {quesId} = req.params;
-try{
-  const answers = await answerModel.find({questionId:quesId});
-  console.log(answers);
-  res.json({success:true,data:answers});
-}
-catch(error){
-console.log("Error :",error);
-}
-}
-
-// const getQuesByUserId = async(req,res)=>{
-// const {userId} = req.params;
-// try{
-//   const questions = await questionModel.find({userId:userId});
-//   console.log(questions);
-//   res.json({success:true,data:{questions}});
-// }
-// catch(error){
-// console.log("Error :",error);
-// }
-// }
-
-export {addAnswer,getAllAnswersByQuesId}
+export { addAnswer, getAllAnswersByQuesId, getAnswerCount, getAnswersByUserId };

@@ -7,7 +7,7 @@ import fs from 'fs';
 
 
 const createToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 const login_user = async (req, res) => {
@@ -27,14 +27,14 @@ const login_user = async (req, res) => {
 
     res.json({ success: true, token });
   } catch (error) {
-    console.log(error);
-    res.json({ success: false, message: "Error" });
+    console.error("Login error:", error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
 const register_user = async (req, res) => {
 
-  const { email, password, firstName,lastName } = req.body;
+  const { email, password, firstName, lastName } = req.body;
   const profileLocalPath = req.file ? req.file.path : null;
 
   try {
@@ -42,8 +42,8 @@ const register_user = async (req, res) => {
     if (!validator.isEmail(email)) {
       return res.status(400).json({ success: false, message: "Email is not valid" });
     }
-    
-        // Check if user already exists
+
+    // Check if user already exists
     const userExist = await userModel.findOne({ email });
     if (userExist) {
       return res.status(409).json({ success: false, message: "User already exists" });
@@ -54,14 +54,11 @@ const register_user = async (req, res) => {
     const hashed_password = await bcrypt.hash(password, salt);
 
     let cloudinaryResponse = null;
-    console.log(profileLocalPath);
 
     if (profileLocalPath) {
-      console.log('Uploading file to Cloudinary:', profileLocalPath);
       try {
         cloudinaryResponse = await uploadOnCloud(profileLocalPath);
-        console.log('Cloudinary response:', cloudinaryResponse);
-        fs.unlinkSync(profileLocalPath); // Remove file after successful upload
+        fs.unlinkSync(profileLocalPath);
       } catch (error) {
         console.error('Error uploading to Cloudinary:', error);
         return res.status(500).json({ success: false, message: "Error uploading profile picture", error: error.message });
@@ -73,8 +70,10 @@ const register_user = async (req, res) => {
       email,
       password: hashed_password,
       firstName: firstName,
-      lastName:lastName,
-      profile_picture: cloudinaryResponse ? cloudinaryResponse.url : null
+      lastName: lastName,
+      profile_picture: cloudinaryResponse ? cloudinaryResponse.url : null,
+      bio: '',
+      interests: []
     });
 
     // Save the user to the database
@@ -104,9 +103,9 @@ const getUserDetails = async (req, res) => {
   }
 };
 
-const getOtherUserInfo = async(req,res)=>{
+const getOtherUserInfo = async (req, res) => {
   try {
-    const user = await userModel.findById(req.body.userId);
+    const user = await userModel.findById(req.body.userId).select('-password');
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
@@ -115,41 +114,65 @@ const getOtherUserInfo = async(req,res)=>{
     console.error(error);
     res.status(500).json({ success: false, message: "Server Error", error: error.message });
   }
-}
+};
 
-const updateUserInterests =  (async (req, res) => {
+const updateProfile = async (req, res) => {
+  const { userId, firstName, lastName, bio } = req.body;
+  const profileLocalPath = req.file ? req.file.path : null;
+
+  try {
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    if (firstName) user.firstName = firstName;
+    if (lastName) user.lastName = lastName;
+    if (bio !== undefined) user.bio = bio;
+
+    if (profileLocalPath) {
+      try {
+        const cloudinaryResponse = await uploadOnCloud(profileLocalPath);
+        user.profile_picture = cloudinaryResponse.url;
+        fs.unlinkSync(profileLocalPath);
+      } catch (error) {
+        console.error('Error uploading to Cloudinary:', error);
+      }
+    }
+
+    await user.save();
+    const updatedUser = await userModel.findById(userId).select('-password');
+    res.json({ success: true, user: updatedUser, message: "Profile updated successfully" });
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+
+const updateUserInterests = async (req, res) => {
   const { userId } = req.params;
   const { interests } = req.body;
 
   try {
-    // Update user's interests in the database
-    const user = await userModel.findByIdAndUpdate(userId, { interests }, { new: true });
-
-    // Send a success response
-    res.status(200).json({ message: 'Interests updated successfully', user });
+    const user = await userModel.findByIdAndUpdate(userId, { interests }, { new: true }).select('-password');
+    res.status(200).json({ success: true, message: 'Interests updated successfully', user });
   } catch (error) {
-    // Handle any errors and send an error response
     console.error('Error updating interests:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-}) 
+};
 
-const getUserInterests =  (async (req, res) => {
+const getUserInterests = async (req, res) => {
   const { userId } = req.params;
 
   try {
-    // Update user's interests in the database
-    const user = await userModel.findById(userId);
-
-    // Send a success response
-    res.status(200).json({ message: 'Interests updated successfully', user });
+    const user = await userModel.findById(userId).select('interests');
+    res.status(200).json({ success: true, interests: user.interests });
   } catch (error) {
-    // Handle any errors and send an error response
-    console.error('Error updating interests:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error('Error getting interests:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
-})
+};
 
 
-
-export { login_user, register_user, getUserDetails ,updateUserInterests,getUserInterests,getOtherUserInfo};
+export { login_user, register_user, getUserDetails, updateUserInterests, getUserInterests, getOtherUserInfo, updateProfile };
